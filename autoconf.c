@@ -3,8 +3,9 @@
  *
  * Produced at the Lawrence Livermore National Laboratory. Written by:
  *     Barry Rountree <rountree@llnl.gov>,
- *     Scott Walker <walker91@llnl.gov>, and
- *     Kathleen Shoga <shoga1@llnl.gov>.
+ *     Scott Walker <walker91@llnl.gov>,
+ *     Kathleen Shoga <shoga1@llnl.gov>, and
+ *     Daniele Cesarini <d.cesarini@cineca.it>
  *
  * LLNL-CODE-645430
  *
@@ -56,22 +57,23 @@ uint64_t detect_arch(void)
     return ((rax >> 4) & 0xF) | ((rax >> 12) & 0xF0);
 }
 
-FILE *open_header(char *a)
+FILE *open_header(char *a, char *pt_h_dir)
 {
     FILE *header = NULL;
     char fname[FNAME_SIZE];
     uint64_t arch = detect_arch();
 
-    if (a != NULL) {
-        snprintf(fname, FNAME_SIZE, "platform_headers/Intel%s.h", a);
+    if (strcmp(a, "") != 0) {
+        snprintf(fname, FNAME_SIZE, "%splatform_headers/Intel%s.h", pt_h_dir, a);
     }
     else {
-        snprintf(fname, FNAME_SIZE, "platform_headers/Intel%lX.h", arch);
+        snprintf(fname, FNAME_SIZE, "%splatform_headers/Intel%lX.h", pt_h_dir, arch);
     }
+
     header = fopen(fname, "r");
     if (header == NULL) {
         fprintf(stderr, "ERROR: unable to open file %s\n", fname);
-        if (a != NULL) {
+        if (strcmp(a, "") == 0) {
             fprintf(stderr, "Model %s may not be supported. No matching header files found in platform_headers/.\n", a);
         }
         else {
@@ -82,21 +84,23 @@ FILE *open_header(char *a)
     return header;
 }
 
-FILE *open_master(void)
+FILE *open_master(char *output_dir)
 {
-    FILE *master = fopen("include/master.h", "w");
+    char master_file[FNAME_SIZE];
+    snprintf(master_file, FNAME_SIZE, "%sinclude/master.h", output_dir);
+    FILE *master = fopen(master_file, "w");
 
     if (master == NULL) {
-        fprintf(stderr, "ERROR: unable to open file include/master.h\n");
+        fprintf(stderr, "ERROR: unable to open file %sinclude/master.h\n", output_dir);
         exit(-2);
     }
     return master;
 }
 
-int copy(char *arch)
+int copy(char *arch, char *pt_h_dir, char *output_dir)
 {
-    FILE *header = open_header(arch);
-    FILE *master = open_master();
+    FILE *header = open_header(arch, pt_h_dir);
+    FILE *master = open_master(output_dir);
     char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
     size_t bsize = BUFFER_SIZE;
     size_t ret = 0;
@@ -134,6 +138,8 @@ int main(int argc, char **argv)
                         "OPTIONS\n"
                         "  --help | -h\n"
                         "      Display this help information, then exit.\n"
+                        "  -d\n"
+                        "      Directory of platform headers.\n"
                         "  -f\n"
                         "      Target architecture model.\n"
                         "\n";
@@ -142,21 +148,37 @@ int main(int argc, char **argv)
         printf(usage, argv[0]);
         return EXIT_SUCCESS;
     }
-    if (argc > 3) {
+    if (argc > 7) {
         printf(usage, argv[0]);
         return EXIT_FAILURE;
     }
-    /* Auto-detect architecture model. */
-    if (argc == 1) {
-        copy(NULL);
-        return EXIT_SUCCESS;
-    }
 
-    int opt;
-    while ((opt = getopt(argc, argv, "f:")) != -1) {
+    int opt, len;
+    extern char *optarg;
+    char pt_h_dir[FNAME_SIZE], output_dir[FNAME_SIZE], arch[FNAME_SIZE];
+    strcpy(pt_h_dir, "");
+    strcpy(output_dir, "");
+    strcpy(arch, "");
+    while ((opt = getopt(argc, argv, "d:o:f:")) != -1) {
         switch(opt) {
+            case 'd':
+                strcpy(pt_h_dir, optarg);
+                len = strlen(pt_h_dir);
+                if(pt_h_dir[len-1] != '/'){
+                    pt_h_dir[len] = '/';
+                    pt_h_dir[len+1] = '\0';
+                }
+                break;
+            case 'o':
+                strcpy(output_dir, optarg);
+                len = strlen(output_dir);
+                if(output_dir[len-1] != '/'){
+                    output_dir[len] = '/';
+                    output_dir[len+1] = '\0';
+                }
+                break;
             case 'f':
-                copy(optarg);
+                strcpy(arch, optarg);
                 break;
             default:
                 fprintf(stderr, "\nError: unknown parameter \"%c\"\n", opt);
@@ -164,5 +186,8 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
         }
     }
+
+    copy(arch, pt_h_dir, output_dir);
+
     return EXIT_SUCCESS;
 }
