@@ -25,7 +25,7 @@ else()
 endif()
 
 # Add dynamic library
-add_library(msr ${sources})
+add_library(msr SHARED ${sources})
 target_link_libraries(msr
     PRIVATE msr-hwloc m
 )
@@ -35,9 +35,20 @@ target_include_directories(msr
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 add_dependencies(msr autoconf_command)
 
+add_library(msr-static STATIC ${sources})
+target_link_libraries(msr-static
+    PRIVATE msr-hwloc m
+)
+target_include_directories(msr-static 
+    PUBLIC 
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+add_dependencies(msr-static autoconf_command)
+set_target_properties(msr-static PROPERTIES OUTPUT_NAME msr)
+
 # Install library
 install(
-    TARGETS msr msr-hwloc
+    TARGETS msr msr-static msr-hwloc
     EXPORT msrTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
