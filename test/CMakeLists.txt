@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 set(LIBMSR_TESTS
     power_unit_test
     libmsr_test
@@ -13,8 +11,5 @@ set(LIBMSR_TESTS
 
 foreach(TEST ${LIBMSR_TESTS})
     add_executable(${TEST} ${TEST}.c)
-    set_target_properties(${TEST} PROPERTIES COMPILE_FLAGS "-g -Wall -D_GNU_SOURCE")
-    target_link_libraries(${TEST} msr)
+    target_link_libraries(${TEST} PRIVATE msr m)
 endforeach()
-
-include_directories(${PROJECT_SOURCE_DIR}/include)

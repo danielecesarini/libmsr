@@ -42,8 +42,3 @@ if(NOT HWLOC_INCLUDE_DIRS AND NOT HWLOC_LIBRARY)
     message(STATUS "  HWLOC_LIBRARY = ${HWLOC_LIBRARY}")
     set(HWLOC_FOUND TRUE)
 endif()
-
-# Abort if all methods fail
-if(NOT HWLOC_FOUND)
-    MESSAGE(FATAL_ERROR "Hwloc support needed")
-endif()

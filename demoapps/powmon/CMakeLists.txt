@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_C_FLAGS "-pthread")
-set(CMAKE_CXX_FLAGS "-pthread")
-
 set(POWMON_SOURCES
     highlander.c
     powmon.c
@@ -16,22 +11,25 @@ set(POWER_WRAPPER_DYNAMIC_SOURCES
     power_wrapper_dynamic.c
     rapl2.c)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+# Dependencies
+find_package(Threads REQUIRED)
 
-add_executable (powmon ${POWMON_SOURCES})
-add_executable (power_wrapper_static ${POWER_WRAPPER_STATIC_SOURCES})
-add_executable (power_wrapper_dynamic ${POWER_WRAPPER_DYNAMIC_SOURCES})
+# Executables
+add_executable(powmon ${POWMON_SOURCES})
+add_executable(power_wrapper_static ${POWER_WRAPPER_STATIC_SOURCES})
+add_executable(power_wrapper_dynamic ${POWER_WRAPPER_DYNAMIC_SOURCES})
 
-target_link_libraries (powmon msr)
-target_link_libraries (power_wrapper_static msr)
-target_link_libraries (power_wrapper_dynamic msr)
+target_link_libraries(powmon PRIVATE msr Threads::Threads)
+target_link_libraries(power_wrapper_static PRIVATE msr Threads::Threads)
+target_link_libraries(power_wrapper_dynamic PRIVATE msr Threads::Threads m)
 
-install(TARGETS powmon EXPORT libmsr-libs DESTINATION
-    "${CMAKE_INSTALL_PREFIX}/bin"
-)
-install(TARGETS power_wrapper_static EXPORT libmsr-libs DESTINATION
-    "${CMAKE_INSTALL_PREFIX}/bin"
-)
-install(TARGETS power_wrapper_dynamic EXPORT libmsr-libs DESTINATION
-    "${CMAKE_INSTALL_PREFIX}/bin"
-)
+target_include_directories(powmon PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(power_wrapper_static PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(power_wrapper_dynamic PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
+# Install binaries
+install(
+    TARGETS powmon power_wrapper_static power_wrapper_dynamic
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
