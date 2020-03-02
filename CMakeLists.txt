@@ -1,5 +1,5 @@
 project(libmsr C)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 
 # Force default build type to be RelWithDebInfo
 if (NOT CMAKE_BUILD_TYPE)
@@ -33,7 +33,6 @@ endif()
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(dox)
-
 add_subdirectory(test)
 add_subdirectory(msrmod)
 add_subdirectory(demoapps/powmon)
@@ -41,5 +40,5 @@ add_subdirectory(demoapps/powmon)
 # Export targets
 install(EXPORT msrTargets
         FILE msrTargets.cmake
-        NAMESPACE msr::
+        NAMESPACE MSR::
         DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/msr)

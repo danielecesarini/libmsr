@@ -1,4 +1,3 @@
-# Static and dynamic libs have the same sources, so make a variable.
 set(sources
     cpuid.c
     csr_core.c
@@ -14,18 +13,12 @@ set(sources
     msr_turbo.c
 )
 
-# Dependencies
-find_package(HWLOC)
-if(HWLOC_FOUND)
-    add_library(msr-hwloc INTERFACE)
-    target_link_libraries(msr-hwloc INTERFACE ${HWLOC_LIBRARY})
-    target_include_directories(msr-hwloc INTERFACE ${HWLOC_INCLUDE_DIRS})
-else()
-    MESSAGE(FATAL_ERROR "Hwloc support needed")
-endif()
+# Create an interface library for HWLOC
+add_library(msr-hwloc INTERFACE)
+add_library(msr SHARED ${sources})
+add_library(msr-static STATIC ${sources})
 
 # Add dynamic library
-add_library(msr SHARED ${sources})
 target_link_libraries(msr
     PRIVATE msr-hwloc m
 )
@@ -35,7 +28,7 @@ target_include_directories(msr
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 add_dependencies(msr autoconf_command)
 
-add_library(msr-static STATIC ${sources})
+# Add static library
 target_link_libraries(msr-static
     PRIVATE msr-hwloc m
 )
@@ -46,10 +39,9 @@ target_include_directories(msr-static
 add_dependencies(msr-static autoconf_command)
 set_target_properties(msr-static PROPERTIES OUTPUT_NAME msr)
 
-# Install library
+# Add libraries to the export target
 install(
     TARGETS msr msr-static msr-hwloc
-    EXPORT msrTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
