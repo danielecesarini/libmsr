@@ -1,4 +1,4 @@
-set(header_sources
+set(_public_headers
     csr_imc.h
     csr_core.h
     cpuid.h
@@ -15,25 +15,16 @@ set(header_sources
 )
 
 # Copy all public headers in the build directory
-file(COPY ${header_sources} DESTINATION ${PROJECT_BINARY_DIR}/include)
+file(COPY ${_public_headers} DESTINATION ${PROJECT_BINARY_DIR}/include)
 
 # Add master.h to the public headers
-set(header_sources "${header_sources};master.h")
+set(_public_headers "${_public_headers};master.h")
 
 # Add building path to all public headers
-foreach(header ${header_sources})
-    set(build_headers ${build_headers};${PROJECT_BINARY_DIR}/include/${header})
+set(_build_headers)
+foreach(header ${_public_headers})
+    list(APPEND _build_headers "${PROJECT_BINARY_DIR}/include/${header}")
 endforeach()
 
-# Create an interface library to install the public headers
-add_library(msr_headers INTERFACE)
-set_target_properties(msr_headers
-    PROPERTIES
-        PUBLIC_HEADER 
-            "${build_headers}")
-
-# Add public headers to the export target
-install(
-    TARGETS msr_headers
-    EXPORT msrTargets
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+# Set the global variable
+set(BUILD_HEADERS "${_build_headers}" PARENT_SCOPE)

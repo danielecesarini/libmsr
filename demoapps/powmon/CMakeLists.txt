@@ -28,8 +28,4 @@ target_include_directories(power_wrapper_static PRIVATE ${PROJECT_SOURCE_DIR}/in
 target_include_directories(power_wrapper_dynamic PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 # Install binaries
-install(
-    TARGETS powmon power_wrapper_static power_wrapper_dynamic
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS powmon power_wrapper_static power_wrapper_dynamic)

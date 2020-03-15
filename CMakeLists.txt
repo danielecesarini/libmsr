@@ -29,6 +29,12 @@ else()
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
 
+# Add dependecies
+find_package(HWLOC REQUIRED)
+add_library(msr-hwloc INTERFACE)
+target_link_libraries(msr-hwloc INTERFACE ${HWLOC_LIBRARIES})
+target_include_directories(msr-hwloc INTERFACE ${HWLOC_INCLUDE_DIRS})
+
 # Add subdirectories
 add_subdirectory(include)
 add_subdirectory(src)
@@ -41,4 +47,4 @@ add_subdirectory(demoapps/powmon)
 install(EXPORT msrTargets
         FILE msrTargets.cmake
         NAMESPACE MSR::
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake/msr)
+        DESTINATION cmake/msr)

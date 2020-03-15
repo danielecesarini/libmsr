@@ -11,5 +11,10 @@ set(LIBMSR_TESTS
 
 foreach(TEST ${LIBMSR_TESTS})
     add_executable(${TEST} ${TEST}.c)
-    target_link_libraries(${TEST} PRIVATE msr m)
+    target_link_libraries(${TEST} PRIVATE msr msr-static msr-hwloc m)
+
+    # Install binaries
+    install(
+        TARGETS ${TEST}
+        RUNTIME DESTINATION test)
 endforeach()
