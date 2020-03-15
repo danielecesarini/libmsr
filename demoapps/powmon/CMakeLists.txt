@@ -27,5 +27,11 @@ target_include_directories(powmon PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(power_wrapper_static PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(power_wrapper_dynamic PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
+# Add rpath to libmsr
+set_target_properties(powmon power_wrapper_static power_wrapper_dynamic
+    PROPERTIES
+        INSTALL_RPATH "$ORIGIN/../lib")
+
 # Install binaries
-install(TARGETS powmon power_wrapper_static power_wrapper_dynamic)
+install(TARGETS powmon power_wrapper_static power_wrapper_dynamic
+    RUNTIME DESTINATION demo)
