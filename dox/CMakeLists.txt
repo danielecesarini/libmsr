@@ -1,15 +1,14 @@
 find_package(Doxygen)
-if (DOXYGEN_FOUND)
-    add_custom_target(doc 
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating API documentation with Doxygen" VERBATIM
-    )
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_GENERATE_LATEX YES)
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_GENERATE_MAN NO)
 
-    add_custom_target(latex_doc
-        make
-        DEPENDS doc
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/latex
-        COMMENT "Building Doxygen Latex documentation" VERBATIM
+    doxygen_add_docs(doxygen
+        Doxyfile
+        ${PROJECT_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen"
     )
+else()
+    message("Doxygen need to be installed to generate the doxygen documentation")
 endif(DOXYGEN_FOUND)
